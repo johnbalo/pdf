@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Excel to Table</title>
+</head>
+<body>
+  <h1>Upload Excel and Transform to Table</h1>
+  <input type="file" id="fileInput" /><br>
+ 
+ <div id="tableContainer"></div>
+
+<style>
+
+table {
+  border: 0px, none;
+  border-collapse: collapse;
+}
+#tableContainer{
+
+  margin-top: 20px;
+}
+
+</style>
+
+
+
+  <script>
+    // Function to handle file upload and transformation
+    function handleFileUpload() {
+      const fileInput = document.getElementById('fileInput');
+      const tableContainer = document.getElementById('tableContainer');
+
+      // Check if a file is selected
+      if (fileInput.files.length === 0) {
+        tableContainer.innerHTML = 'Please select an Excel file.';
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      // Event handler when the file is loaded
+      reader.onload = function(event) {
+        const data = event.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const tableData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (tableData.length === 0) {
+          tableContainer.innerHTML = 'The Excel file is empty.';
+          return;
+        }
+
+        let tableHTML = '<table border="1">';
+
+        // Generate table rows and columns
+        for (const row of tableData) {
+          tableHTML += '<tr>';
+          for (const cell of row) {
+            tableHTML += `<td>${cell}</td>`;
+          }
+          tableHTML += '</tr>';
+        }
+
+        tableHTML += '</table>';
+        tableContainer.innerHTML = tableHTML;
+      };
+
+      // Read the file as binary data
+      reader.readAsBinaryString(file);
+    }
+
+    // Attach event listener to the file input
+    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+    
+
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+</body>
+</html>
